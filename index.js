@@ -4,10 +4,10 @@ let globalTaskData = [];
 const generateHTML = (taskData) =>{return`	<div id = ${(taskData.id)} class=" col-md-6 col-lg-4 ">
   <div class="card">
     <div class="card-header gap-2 d-flex justify-content-end ">
-      <button style="border" class="btn btn-outline-info  " type="button" name="button">
-        <i class="fal fa-pencil"></i></button>
-      <button class="btn btn-outline-danger " type="button" name="button">
-        <i class="fal fa-trash-alt"></i></button>
+      <button style="border" class="btn btn-outline-info  " type="button" name=${(taskData.id)}>
+        <i name =${(taskData.id)} class="fal fa-pencil"></i></button>
+      <button onclick="deleteCard.apply(this,arguments)"class="btn btn-outline-danger " type="button" name=${(taskData.id)}>
+        <i name = "${(taskData.id)}" class="fal fa-trash-alt"></i></button>
     </div>
     <div class="card-body ">
       <img class="img-fluid" src=${(taskData.image)}>
@@ -70,4 +70,22 @@ const loadExistingCards = () =>{
 
   })
   return
+}
+const deleteCard = (event) =>
+{
+  const targetId = event.target.getAttribute("Name")
+  const elementtype = event.target.tagname
+  const removeitem = globalTaskData.map((task) => task.id !== targetId);
+  globalTaskData = removeitem
+  localStorage.setItem("TaskyKey",JSON.stringify({card : globalTaskData }))
+
+  if(elementtype == "BUTTON")
+  {
+    return task_container.removeChild(event.target.parentNode.parentNode.parentNode)
+  }
+  else
+  {
+    return task_container.removeChild(event.target.parentNode.parentNode.parentNode)
+
+  }
 }
