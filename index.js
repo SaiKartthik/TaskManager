@@ -1,166 +1,176 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous"
+const taskContainer = document.querySelector(".task__container");
+let globalTaskData = [];
+
+const generateHTML = (taskData) => {
+  return ` <div id=${taskData.id} class="col-md-6 col-lg-4 my-4">
+<div class="card">
+  <div class="card-header gap-2 d-flex justify-content-end">
+    <button class="btn btn-outline-info" name=${taskData.id} onclick="editCard.apply(this, arguments)" >
+      <i class="fal fa-pencil" name=${taskData.id}></i>
+    </button>
+    <button class="btn btn-outline-danger" name=${taskData.id} onclick="deleteCard.apply(this, arguments)">
+      <i class="far fa-trash-alt" name=${taskData.id}></i>
+    </button>
+  </div>
+  <div class="card-body">
+    <img
+      src=${taskData.image}
+      alt="image"
+      class="card-img"
     />
+    <h5 class="card-title mt-4">${taskData.title}</h5>
+    <p class="card-text">
+      ${taskData.description}
+    </p>
+    <span class="badge bg-primary">${taskData.type}</span>
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-outline-primary" name=${taskData.id}>Open Task</button>
+  </div>
+</div>
+</div>`;
+};
 
-    <link
-      rel="stylesheet"
-      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-      crossorigin="anonymous"
-    />
+const saveToLocalStorage = () =>
+  localStorage.setItem("taskyCA", JSON.stringify({ card: globalTaskData }));
 
-    <title>Task Management APP</title>
-  </head>
-  <body style="background-color: #fad2e1" onload="loadExistingCards()">
-    <!-- Modal -->
-    <div
-      class="modal fade"
-      id="newTask"
-      tabindex="-1"
-      aria-labelledby="newTaskLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="newTaskLabel">Enter New Task</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="imageURL" class="form-label">Image URL</label>
-              <input
-                type="url"
-                class="form-control"
-                id="imageURL"
-                placeholder="http://image/image.jpg"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="taskTitle" class="form-label">Task Title</label>
-              <input
-                type="text"
-                class="form-control"
-                id="taskTitle"
-                placeholder="Exercise"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="taskType" class="form-label">Task Type</label>
-              <input
-                type="text"
-                class="form-control"
-                id="taskType"
-                placeholder="practice"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="taskDescription" class="form-label"
-                >Enter Something</label
-              >
-              <textarea
-                id="taskDescription"
-                class="form-control"
-                rows="3"
-                placeholder="This is DOM Manipulation class"
-              ></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="addNewCard()"
-              data-bs-dismiss="modal"
-            >
-              Save changes
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <header style="background-color: #ff758f">
-      <nav  class="navbar navbar-expand-lg navbar-light bg-light shadow">
-        <div  class="container-fluid">
-          <a class="fs-3 fw-bolder" href="#">Task Manager</a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-3 me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-            </ul>
-            <button
-              class="btn btn-primary"
-              type="button"
-              data-bs-toggle="modal"
-              data-bs-target="#newTask"
-            >
-              <i class="far fa-plus"></i> Add New
-            </button>
-          </div>
-        </div>
-      </nav>
-    </header>
+const insertToDOM = (content) =>
+  taskContainer.insertAdjacentHTML("beforeend", content);
 
-    <main class="container">
-      <section class="row justify-content-center mt-5">
-        <div class="col-md-8 col-lg-6">
-          <div class="input-group mb-3 shadow">
-            <input
-              type="search"
-              class="form-control"
-              placeholder="Search Task"
-              aria-label="Search Task"
-              aria-describedby="basic-addon1"
-            />
-            <span class="input-group-text" id="basic-addon1">
-              <i class="far fa-search"></i>
-            </span>
-          </div>
-        </div>
-      </section>
+const addNewCard = () => {
+  // get task data
+  const taskData = {
+    id: `${Date.now()}`,
+    title: document.getElementById("taskTitle").value,
+    image: document.getElementById("imageURL").value,
+    type: document.getElementById("taskType").value,
+    description: document.getElementById("taskDescription").value,
+  };
 
-      <section class="task__container row"></section>
-    </main>
+  globalTaskData.push(taskData);
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-      crossorigin="anonymous"
-    ></script>
+  saveToLocalStorage();
 
-    <script src="index.js"></script>
-  </body>
-</html>
+  const newCard = generateHTML(taskData);
+
+  insertToDOM(newCard);
+
+  // clear the form
+  document.getElementById("taskTitle").value = "";
+  document.getElementById("imageURL").value = "";
+  document.getElementById("taskType").value = "";
+  document.getElementById("taskDescription").value = "";
+
+  return;
+};
+
+const loadExistingCards = () => {
+  // check localstorage
+  const getData = localStorage.getItem("taskyCA");
+
+  // parse JSON data, if exist
+  if (!getData) return;
+
+  const taskCards = JSON.parse(getData);
+
+  globalTaskData = taskCards.card;
+
+  globalTaskData.map((taskData) => {
+    const newCard = generateHTML(taskData);
+    insertToDOM(newCard);
+  });
+
+  return;
+};
+
+const deleteCard = (event) => {
+  const targetID = event.target.getAttribute("name");
+  const elementType = event.target.tagName;
+
+  const removeTask = globalTaskData.filter((task) => task.id !== targetID);
+  globalTaskData = removeTask;
+
+
+  saveToLocalStorage();
+
+  // access DOM to remove card
+  if (elementType === "BUTTON") {
+    return taskContainer.removeChild(
+      event.target.parentNode.parentNode.parentNode
+    );
+  } else {
+    return taskContainer.removeChild(
+      event.target.parentNode.parentNode.parentNode.parentNode
+    );
+  }
+};
+
+const editCard = (event) => {
+  const elementType = event.target.tagName;
+
+  let taskTitle;
+  let taskType;
+  let taskDescription;
+  let parentElement;
+  let submitButton;
+
+  if (elementType === "BUTTON") {
+    parentElement = event.target.parentNode.parentNode;
+  } else {
+    parentElement = event.target.parentNode.parentNode.parentNode;
+  }
+
+  taskTitle = parentElement.childNodes[3].childNodes[3];
+  taskDescription = parentElement.childNodes[3].childNodes[5];
+  taskType = parentElement.childNodes[3].childNodes[7];
+  submitButton = parentElement.childNodes[5].childNodes[1];
+
+  taskTitle.setAttribute("contenteditable", "true");
+  taskDescription.setAttribute("contenteditable", "true");
+  taskType.setAttribute("contenteditable", "true");
+  submitButton.setAttribute("onclick", "saveEdit.apply(this, arguments)");
+  submitButton.innerHTML = "Save Changes";
+};
+
+const saveEdit = (event) => {
+  const targetID = event.target.getAttribute("name");
+  const elementType = event.target.tagName;
+
+  let parentElement;
+
+  if (elementType === "BUTTON") {
+    parentElement = event.target.parentNode.parentNode;
+  } else {
+    parentElement = event.target.parentNode.parentNode.parentNode;
+  }
+
+  const taskTitle = parentElement.childNodes[3].childNodes[3];
+  const taskDescription = parentElement.childNodes[3].childNodes[5];
+  const taskType = parentElement.childNodes[3].childNodes[7];
+  const submitButton = parentElement.childNodes[5].childNodes[1];
+
+  const updatedData = {
+    title: taskTitle.innerHTML,
+    type: taskType.innerHTML,
+    description: taskDescription.innerHTML,
+  };
+
+  console.log({ updatedData, targetID });
+
+  const updateGlobalTasks = globalTaskData.map((task) => {
+    if (task.id === targetID) {
+      console.log({ ...task, ...updatedData });
+      return { ...task, ...updatedData };
+    }
+    return task;
+  });
+
+  globalTaskData = updateGlobalTasks;
+
+  saveToLocalStorage();
+
+  taskTitle.setAttribute("contenteditable", "false");
+  taskDescription.setAttribute("contenteditable", "false");
+  taskType.setAttribute("contenteditable", "false");
+  submitButton.innerHTML = "Open Task";
+};
